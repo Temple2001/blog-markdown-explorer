@@ -1,0 +1,91 @@
+{
+  "name": "astro-blog-viewer",
+  "displayName": "Astro Blog Viewer",
+  "description": "Tree view and search for Astro blog markdown posts",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "astro-blog-viewer.refreshEntry",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "astro-blog-viewer.openFile",
+        "title": "Open File"
+      },
+      {
+        "command": "astro-blog-viewer.search",
+        "title": "Search Posts",
+        "icon": "$(search)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "astro-blog-explorer",
+          "title": "Astro Blog",
+          "icon": "$(markdown)"
+        }
+      ]
+    },
+    "views": {
+      "astro-blog-explorer": [
+        {
+          "id": "astroPostView",
+          "name": "Posts"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "astro-blog-viewer.refreshEntry",
+          "when": "view == astroPostView",
+          "group": "navigation"
+        },
+        {
+          "command": "astro-blog-viewer.search",
+          "when": "view == astroPostView",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Astro Blog Viewer",
+      "properties": {
+        "astro-blog-viewer.postsPath": {
+          "type": "string",
+          "default": "public/post",
+          "description": "Path to Astro blog posts (relative to workspace root)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "16.x",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3"
+  }
+}
