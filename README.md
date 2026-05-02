@@ -1,13 +1,14 @@
-# My VS Code Extension
+# Blog Markdown Explorer
 
-## Features
+블로그 마크다운 파일을 한 번에 조회하고 빠르게 검색할 수 있는 VS Code 확장 프로그램입니다.
 
-- **Hello World Command**: Run it from the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) by typing "Hello World".
+## 기능
 
-## Getting Started
+- **Tree View**: 지정된 폴더(`public/post` 기본값) 내의 `.md` 파일들을 읽어 Frontmatter의 `tags[0]`(대분류) 기준으로 그룹화하여 보여줍니다.
+- **빠른 검색**: 커맨드 팔레트 또는 사이드바 탭의 검색 버튼을 통해 제목과 태그 기반으로 포스트를 쉽게 검색할 수 있습니다.
+- **자동 갱신**: 포스트 파일의 추가, 수정, 삭제를 감지하여 사이드바 리스트를 자동으로 새로고침합니다.
 
-1. Open this folder in VS Code.
-2. Run `npm install` in the terminal.
-3. Press `F5` to start debugging.
-4. A new VS Code window (Extension Development Host) will open.
-5. Run the `Hello World` command in the new window.
+## 설정
+
+VS Code 설정(Settings)에서 기준 경로를 변경할 수 있습니다.
+- `astro-blog-viewer.postsPath`: 포스트가 위치한 기준 경로 (기본값: `public/post`)
