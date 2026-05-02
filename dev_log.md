@@ -25,3 +25,6 @@
 ### 4. 다음 계획 (필요 시)
 - 실제 환경(Astro 블로그)에서 정상적으로 포스트가 파싱되는지 검증.
 - 추가적인 정렬 기준이나 필터 기능(태그별 필터링 등) 검토.
+
+### 5. 추가 변경 사항 (이름 및 설명 업데이트)
+- `package.json`의 `displayName`을 `Blog Markdown Explorer`로, `description`을 목적에 맞게 업데이트.
