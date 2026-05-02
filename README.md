@@ -12,7 +12,7 @@
 
 현재 이 확장 프로그램은 VS Code 마켓플레이스에 등록되어 있지 않으며, GitHub 릴리즈를 통해 직접 설치할 수 있습니다.
 
-1. 이 저장소의 [Releases 페이지](../../releases)로 이동합니다.
+1. 이 저장소의 Releases 페이지(GitHub 저장소 상단 탭)로 이동합니다.
 2. 최신 릴리즈의 `Assets`에서 `astro-blog-viewer-x.x.x.vsix` 파일을 다운로드합니다.
 3. VS Code를 열고 좌측 탭에서 **확장(Extensions)** 아이콘을 클릭합니다.
 4. 확장 탭의 우측 상단 `...` (Views and More Actions) 버튼을 클릭합니다.
