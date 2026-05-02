@@ -50,7 +50,29 @@ export class PostTreeDataProvider implements vscode.TreeDataProvider<PostNode> {
       return Promise.resolve([]);
     } else {
       // Root level: return categories
-      this.loadPosts();
+      const pathExists = this.loadPosts();
+
+      if (!pathExists) {
+        const config = vscode.workspace.getConfiguration('astro-blog-viewer');
+        const postsPathRelative = config.get<string>('postsPath') || 'public/post';
+        return Promise.resolve([
+          new PostNode(
+            `Directory '${postsPathRelative}' not found`,
+            vscode.TreeItemCollapsibleState.None,
+            'info'
+          )
+        ]);
+      }
+
+      if (this.posts.length === 0) {
+        return Promise.resolve([
+          new PostNode(
+            'No markdown posts found',
+            vscode.TreeItemCollapsibleState.None,
+            'info'
+          )
+        ]);
+      }
       
       const categories = new Set<string>();
       this.posts.forEach(p => {
@@ -71,9 +93,9 @@ export class PostTreeDataProvider implements vscode.TreeDataProvider<PostNode> {
     }
   }
 
-  private loadPosts() {
+  private loadPosts(): boolean {
     this.posts = [];
-    if (!this.workspaceRoot) return;
+    if (!this.workspaceRoot) return false;
 
     const config = vscode.workspace.getConfiguration('astro-blog-viewer');
     const postsPathRelative = config.get<string>('postsPath') || 'public/post';
@@ -81,7 +103,9 @@ export class PostTreeDataProvider implements vscode.TreeDataProvider<PostNode> {
 
     if (fs.existsSync(postsPath)) {
       this.walkDirectory(postsPath);
+      return true;
     }
+    return false;
   }
 
   private walkDirectory(dir: string) {
@@ -181,6 +205,8 @@ export class PostNode extends vscode.TreeItem {
           arguments: [filePath]
         };
       }
+    } else if (contextValue === 'info') {
+      this.iconPath = new vscode.ThemeIcon('info');
     }
   }
 }
