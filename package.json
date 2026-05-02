@@ -31,7 +31,7 @@
       "activitybar": [
         {
           "id": "astro-blog-explorer",
-          "title": "Astro Blog",
+          "title": "Blog Markdown Explorer",
           "icon": "$(markdown)"
         }
       ]
@@ -59,12 +59,12 @@
       ]
     },
     "configuration": {
-      "title": "Astro Blog Viewer",
+      "title": "Blog Markdown Explorer",
       "properties": {
         "astro-blog-viewer.postsPath": {
           "type": "string",
           "default": "public/post",
-          "description": "Path to Astro blog posts (relative to workspace root)"
+          "description": "Path to blog posts (relative to workspace root)"
         }
       }
     }

@@ -28,3 +28,5 @@
 
 ### 5. 추가 변경 사항 (이름 및 설명 업데이트)
 - `package.json`의 `displayName`을 `Blog Markdown Explorer`로, `description`을 목적에 맞게 업데이트.
+- 확장 프로그램 아이콘 호버 시 나오는 컨테이너 이름(`viewsContainers.activitybar[0].title`)을 `Blog Markdown Explorer`로 변경 (기존 "Astro Blog").
+- 확장 프로그램 설정(`configuration.title`) 및 설명을 `Blog Markdown Explorer`로 변경.
