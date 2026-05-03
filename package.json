@@ -3,6 +3,10 @@
   "displayName": "Blog Markdown Explorer",
   "description": "블로그 마크다운 파일을 한 번에 조회하고 빠르게 검색할 수 있는 확장 프로그램입니다.",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Temple2001/blog-markdown-explorer.git"
+  },
   "engines": {
     "vscode": "^1.80.0"
   },
