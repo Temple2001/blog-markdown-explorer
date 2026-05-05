@@ -30,3 +30,9 @@
 - `package.json`의 `displayName`을 `Blog Markdown Explorer`로, `description`을 목적에 맞게 업데이트.
 - 확장 프로그램 아이콘 호버 시 나오는 컨테이너 이름(`viewsContainers.activitybar[0].title`)을 `Blog Markdown Explorer`로 변경 (기존 "Astro Blog").
 - 확장 프로그램 설정(`configuration.title`) 및 설명을 `Blog Markdown Explorer`로 변경.
+
+### 6. v0.0.3 업데이트 (상하 분할 뷰 및 미리보기 강화)
+- **두 개의 뷰 구성:** 트리 뷰를 상하로 나누어 상단에는 "최근 포스트(Recent Posts)", 하단에는 "카테고리별(Categories)" 뷰가 노출되도록 `package.json` 및 `extension.ts` 구조 변경.
+- **최근 글 표시 수 설정:** 화면 크기나 취향에 맞춰 볼 수 있도록 최근 포스트 노출 개수(`astro-blog-viewer.recentPostsCount`, 기본값 10개) 설정 항목 추가.
+- **풍부한 미리보기 (Tooltip):** 글에 마우스를 올렸을 때(Hover) 단순히 파일 경로가 나오는 대신, `title`, `pubDate`, `tags`, `description` 및 **글 내용의 일부(Snippet)**가 마크다운 렌더링 형태로 한눈에 보이도록 `PostNode` 및 `parsePost` 로직 개선.
+- **설명 텍스트 표시:** 최근 글 목록에서는 제목 우측에 태그(`tags`) 목록을 회색 텍스트(`description` 속성)로 노출하여 직관성을 높임.

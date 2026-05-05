@@ -6,18 +6,25 @@ export function activate(context: vscode.ExtensionContext) {
   const workspaceRoot = (vscode.workspace.workspaceFolders && (vscode.workspace.workspaceFolders.length > 0))
     ? vscode.workspace.workspaceFolders[0].uri.fsPath : undefined;
 
-  const postTreeDataProvider = new PostTreeDataProvider(workspaceRoot);
+  const categoryTreeDataProvider = new PostTreeDataProvider(workspaceRoot, 'category');
+  const recentTreeDataProvider = new PostTreeDataProvider(workspaceRoot, 'recent');
   
-  vscode.window.registerTreeDataProvider('astroPostView', postTreeDataProvider);
+  vscode.window.registerTreeDataProvider('astroPostView', categoryTreeDataProvider);
+  vscode.window.registerTreeDataProvider('astroRecentView', recentTreeDataProvider);
+
+  const refreshAll = () => {
+    categoryTreeDataProvider.refresh();
+    recentTreeDataProvider.refresh();
+  };
 
   // Register Refresh Command
   context.subscriptions.push(vscode.commands.registerCommand('astro-blog-viewer.refreshEntry', () =>
-    postTreeDataProvider.refresh()
+    refreshAll()
   ));
 
   // Register Search Command
   context.subscriptions.push(vscode.commands.registerCommand('astro-blog-viewer.search', () =>
-    postTreeDataProvider.searchPosts()
+    categoryTreeDataProvider.searchPosts() // Use one of the providers to handle search
   ));
 
   // Register Open File Command
@@ -34,9 +41,9 @@ export function activate(context: vscode.ExtensionContext) {
     
     const fileWatcher = vscode.workspace.createFileSystemWatcher(postsPattern);
     
-    fileWatcher.onDidChange(() => postTreeDataProvider.refresh());
-    fileWatcher.onDidCreate(() => postTreeDataProvider.refresh());
-    fileWatcher.onDidDelete(() => postTreeDataProvider.refresh());
+    fileWatcher.onDidChange(() => refreshAll());
+    fileWatcher.onDidCreate(() => refreshAll());
+    fileWatcher.onDidDelete(() => refreshAll());
 
     context.subscriptions.push(fileWatcher);
   }

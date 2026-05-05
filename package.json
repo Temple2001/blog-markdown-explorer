@@ -2,7 +2,7 @@
   "name": "astro-blog-viewer",
   "displayName": "Blog Markdown Explorer",
   "description": "블로그 마크다운 파일을 한 번에 조회하고 빠르게 검색할 수 있는 확장 프로그램입니다.",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/Temple2001/blog-markdown-explorer.git"
@@ -43,8 +43,12 @@
     "views": {
       "astro-blog-explorer": [
         {
+          "id": "astroRecentView",
+          "name": "Recent Posts"
+        },
+        {
           "id": "astroPostView",
-          "name": "Posts"
+          "name": "Categories"
         }
       ]
     },
@@ -52,12 +56,12 @@
       "view/title": [
         {
           "command": "astro-blog-viewer.refreshEntry",
-          "when": "view == astroPostView",
+          "when": "view == astroPostView || view == astroRecentView",
           "group": "navigation"
         },
         {
           "command": "astro-blog-viewer.search",
-          "when": "view == astroPostView",
+          "when": "view == astroPostView || view == astroRecentView",
           "group": "navigation"
         }
       ]
@@ -69,6 +73,11 @@
           "type": "string",
           "default": "public/post",
           "description": "Path to blog posts (relative to workspace root)"
+        },
+        "astro-blog-viewer.recentPostsCount": {
+          "type": "number",
+          "default": 10,
+          "description": "Number of recent posts to show in the Recent Posts view"
         }
       }
     }

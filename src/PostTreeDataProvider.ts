@@ -9,7 +9,10 @@ export class PostTreeDataProvider implements vscode.TreeDataProvider<PostNode> {
 
   private posts: Post[] = [];
 
-  constructor(private workspaceRoot: string | undefined) {}
+  constructor(
+    private workspaceRoot: string | undefined,
+    private viewType: 'recent' | 'category'
+  ) {}
 
   refresh(): void {
     this._onDidChangeTreeData.fire();
@@ -25,33 +28,10 @@ export class PostTreeDataProvider implements vscode.TreeDataProvider<PostNode> {
       return Promise.resolve([]);
     }
 
-    if (element) {
-      // This is a category node, return its posts
-      if (element.contextValue === 'category') {
-        const categoryPosts = this.posts.filter(p => p.category === element.label);
-        // Sort by pubDate descending
-        categoryPosts.sort((a, b) => {
-          const dateA = a.pubDate ? new Date(a.pubDate).getTime() : 0;
-          const dateB = b.pubDate ? new Date(b.pubDate).getTime() : 0;
-          return dateB - dateA;
-        });
-
-        const postNodes = categoryPosts.map(p => {
-          return new PostNode(
-            p.title,
-            vscode.TreeItemCollapsibleState.None,
-            'post',
-            p.filePath,
-            p.pubDate ? new Date(p.pubDate).toLocaleDateString() : undefined
-          );
-        });
-        return Promise.resolve(postNodes);
-      }
-      return Promise.resolve([]);
-    } else {
-      // Root level: return categories
+    // loadPosts() on root element to ensure fresh data
+    if (!element) {
       const pathExists = this.loadPosts();
-
+      
       if (!pathExists) {
         const config = vscode.workspace.getConfiguration('astro-blog-viewer');
         const postsPathRelative = config.get<string>('postsPath') || 'public/post';
@@ -73,24 +53,100 @@ export class PostTreeDataProvider implements vscode.TreeDataProvider<PostNode> {
           )
         ]);
       }
-      
-      const categories = new Set<string>();
-      this.posts.forEach(p => {
-        if (p.category) {
-          categories.add(p.category);
-        }
-      });
-
-      const categoryNodes = Array.from(categories).sort().map(cat => {
-        return new PostNode(
-          cat,
-          vscode.TreeItemCollapsibleState.Collapsed,
-          'category'
-        );
-      });
-
-      return Promise.resolve(categoryNodes);
     }
+
+    if (this.viewType === 'recent') {
+      if (element) return Promise.resolve([]); // Recent view is flat
+
+      const sortedPosts = [...this.posts].sort((a, b) => {
+        const dateA = a.pubDate ? new Date(a.pubDate).getTime() : 0;
+        const dateB = b.pubDate ? new Date(b.pubDate).getTime() : 0;
+        return dateB - dateA;
+      });
+
+      const config = vscode.workspace.getConfiguration('astro-blog-viewer');
+      const count = config.get<number>('recentPostsCount') || 10;
+      const recentPosts = sortedPosts.slice(0, count);
+
+      const nodes = recentPosts.map(p => this.createPostNode(p, true));
+      return Promise.resolve(nodes);
+    }
+
+    if (this.viewType === 'category') {
+      if (element) {
+        if (element.contextValue === 'category') {
+          const categoryPosts = this.posts.filter(p => p.category === element.label);
+          categoryPosts.sort((a, b) => {
+            const dateA = a.pubDate ? new Date(a.pubDate).getTime() : 0;
+            const dateB = b.pubDate ? new Date(b.pubDate).getTime() : 0;
+            return dateB - dateA;
+          });
+
+          const postNodes = categoryPosts.map(p => this.createPostNode(p, false));
+          return Promise.resolve(postNodes);
+        }
+        return Promise.resolve([]);
+      } else {
+        const categories = new Set<string>();
+        this.posts.forEach(p => {
+          if (p.category) {
+            categories.add(p.category);
+          }
+        });
+
+        const categoryNodes = Array.from(categories).sort().map(cat => {
+          return new PostNode(
+            cat,
+            vscode.TreeItemCollapsibleState.Collapsed,
+            'category'
+          );
+        });
+
+        return Promise.resolve(categoryNodes);
+      }
+    }
+
+    return Promise.resolve([]);
+  }
+
+  private createPostNode(p: Post, showTagsInDescription: boolean): PostNode {
+    const tooltip = new vscode.MarkdownString();
+    tooltip.appendMarkdown(`**${p.title}**
+
+`);
+    if (p.pubDate) tooltip.appendMarkdown(`*Date:* ${new Date(p.pubDate).toLocaleDateString()}
+
+`);
+    if (p.tags.length > 0) tooltip.appendMarkdown(`*Tags:* ${p.tags.join(', ')}
+
+`);
+    if (p.description) tooltip.appendMarkdown(`*Description:* ${p.description}
+
+`);
+    if (p.contentSnippet) {
+      // Clean up the snippet to remove excessive newlines or headings from preview
+      let cleanSnippet = p.contentSnippet.replace(/#/g, '').trim();
+      tooltip.appendMarkdown(`---
+
+${cleanSnippet}`);
+    }
+
+    const node = new PostNode(
+      p.title,
+      vscode.TreeItemCollapsibleState.None,
+      'post',
+      p.filePath,
+      tooltip
+    );
+    
+    // Recent list shows description/tags next to the label
+    if (showTagsInDescription) {
+      node.description = p.tags.join(', ');
+    } else if (p.pubDate) {
+      node.description = new Date(p.pubDate).toLocaleDateString();
+    }
+    
+    return node;
   }
 
   private loadPosts(): boolean {
@@ -126,7 +182,7 @@ export class PostTreeDataProvider implements vscode.TreeDataProvider<PostNode> {
   private parsePost(filePath: string) {
     try {
       const fileContent = fs.readFileSync(filePath, 'utf8');
-      const { data } = matter(fileContent);
+      const { data, content } = matter(fileContent);
 
       let category = 'Uncategorized';
       if (data.tags && Array.isArray(data.tags) && data.tags.length > 0) {
@@ -138,7 +194,9 @@ export class PostTreeDataProvider implements vscode.TreeDataProvider<PostNode> {
         filePath: filePath,
         category: category,
         pubDate: data.pubDate,
-        tags: data.tags || []
+        tags: data.tags || [],
+        description: data.description,
+        contentSnippet: content.slice(0, 200).trim() + (content.length > 200 ? '...' : '')
       });
     } catch (err) {
       console.error(`Failed to parse markdown file ${filePath}:`, err);
@@ -150,14 +208,13 @@ export class PostTreeDataProvider implements vscode.TreeDataProvider<PostNode> {
 
     this.loadPosts(); // ensure loaded
     
-    // QuickPick items for search
     const items: vscode.QuickPickItem[] = this.posts.map(post => {
       const tagsStr = post.tags.join(', ');
       return {
         label: post.title,
         description: post.category,
         detail: `Date: ${post.pubDate ? new Date(post.pubDate).toLocaleDateString() : 'N/A'} | Tags: ${tagsStr}`,
-        filePath: post.filePath // custom property
+        filePath: post.filePath 
       } as vscode.QuickPickItem & { filePath: string };
     });
 
@@ -180,6 +237,8 @@ interface Post {
   category: string;
   pubDate: string | Date;
   tags: string[];
+  description?: string;
+  contentSnippet?: string;
 }
 
 export class PostNode extends vscode.TreeItem {
@@ -188,7 +247,7 @@ export class PostNode extends vscode.TreeItem {
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     public readonly contextValue: string,
     public readonly filePath?: string,
-    public readonly tooltip?: string
+    public readonly tooltip?: string | vscode.MarkdownString
   ) {
     super(label, collapsibleState);
     
